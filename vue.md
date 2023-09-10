@@ -5,7 +5,7 @@
 yarn create vite
 ```
 
-### Adding alias
+### 2. Adding alias
 ```javascript
 // add or update the following in your tsconfig.json
 "baseUrl": ".",
@@ -45,7 +45,7 @@ export default defineConfig({
 })
 ```
 
-### 2. Adding TailwindCSS
+### 3. Adding TailwindCSS
 ```bash
 # Add required dependencies
 yarn add -D tailwindcss postcss autoprefixer @tailwindcss/typography @tailwindcss/forms @tailwindcss/aspect-ratio @headlessui/tailwindcss tailwindcss-debug-screens
