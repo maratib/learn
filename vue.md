@@ -1,11 +1,11 @@
 # Vue 3 Typescript
 
-#### 1. Creating new project 
+### `1. Creating new project` 
 ```bash
 yarn create vite
 ```
 
-### 2. Adding alias
+### `2. Adding alias`
 ```javascript
 // add or update the following in your tsconfig.json
 "baseUrl": ".",
@@ -45,7 +45,7 @@ export default defineConfig({
 })
 ```
 
-### 3. Adding TailwindCSS
+### `3. Adding TailwindCSS`
 ```bash
 # Add required dependencies
 yarn add -D tailwindcss postcss autoprefixer @tailwindcss/typography @tailwindcss/forms @tailwindcss/aspect-ratio @headlessui/tailwindcss tailwindcss-debug-screens
@@ -94,4 +94,8 @@ module.exports = {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+```
+### `4. Adding Headless UI`
+```bash
+yarn add @headlessui/vue
 ```
