@@ -1,11 +1,5 @@
-# Vue 3 Typescript
+# Adding alias
 
-### `1. Creating new project` 
-```bash
-yarn create vite
-```
-
-### `2. Adding alias`
 ```javascript
 // add or update the following in your tsconfig.json
 "baseUrl": ".",
