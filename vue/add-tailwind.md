@@ -48,3 +48,8 @@ module.exports = {
 @tailwind components;
 @tailwind utilities;
 ```
+
+### Adding Headless UI
+```bash
+yarn add @headlessui/vue
+```

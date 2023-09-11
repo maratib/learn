@@ -46,7 +46,3 @@ export default defineConfig({
 ```
 
 
-### `3. Adding Headless UI`
-```bash
-yarn add @headlessui/vue
-```
