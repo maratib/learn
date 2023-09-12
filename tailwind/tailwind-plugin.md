@@ -2,7 +2,7 @@
 
 ### 1. Line Clamp
 
-[`@tailwindcss/line-clamp`](https://tailwindcss.com/docs/line-clamp)    
+[@tailwindcss/line-clamp](https://tailwindcss.com/docs/line-clamp)    
 Now builtin TailwindCSS utility since version 3.3.3, `so you don't need to add it`.  
 
 Use the `line-clamp-*` utilities to truncate a block of text after a specific number of lines.
