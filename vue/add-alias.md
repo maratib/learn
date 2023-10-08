@@ -1,5 +1,8 @@
 # Adding alias
 
+```bash
+yarn add -D @types/node
+```
 ```javascript
 // add or update the following in your tsconfig.json
 "baseUrl": ".",
