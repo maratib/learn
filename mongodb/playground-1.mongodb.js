@@ -5,6 +5,8 @@ db.student.find(
       { name: 'John' },
       { mail: 'peter@gmail.com' }
     ]
-  }
+  }, {
+  _id: 0, name: 1
+}
 )
 

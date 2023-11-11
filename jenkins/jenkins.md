@@ -16,6 +16,9 @@
 
 - This process allows to identify errors as early as possible.
 
+### Resources :
+[Jekins - Java Techie](https://youtu.be/1QLMqyFFEzU?si=IR207ynGhIsXyKnw)
+
 
 ![Need of CI](../assets/jenkins/Need4CI.png)
 ![CI Architecture](../assets/jenkins/CI-Architectuer.png)
