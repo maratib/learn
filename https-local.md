@@ -10,7 +10,7 @@ npm install -g local-ssl-proxy
         
 # Then install and run the proxy in your project folder using the following :-
 mkcert localhost
-local-ssl-proxy --source 3010 --target 3000 --cert localhost.pem --key localhost-key.pem
-        
+local-ssl-proxy --source 3010 --target 9000 --cert localhost.pem --key localhost-key.pem
+# Strange note target port should be a greater number like 9000 wont work on 3000 etc        
 # https is now running on port 3010 and forwarding requests to http 3000
 ```
