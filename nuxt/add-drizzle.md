@@ -67,6 +67,25 @@ main().catch((err) => {
 
 ```
 ```javascript
+// Add ./db/index.ts
+
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Client } from "pg";
+
+import * as schema from "./schema";
+
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+});
+
+client.connect();
+
+export const db = drizzle(client, { schema: schema });
+
+```
+
+
+```javascript
 // Add new scripts to package scripts
 "gen": "drizzle-kit generate:pg",
 "gen:push": "node -r esbuild-register db/migrate.ts"
