@@ -1,4 +1,4 @@
-Adding Drizzle
+# Adding Drizzle
 
 ```bash
 # Add drizzle with postgres driver
