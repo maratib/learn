@@ -27,24 +27,36 @@ export default defineConfig({
 ```javascript
 // Add ./db/schema.ts 
 
-import { serial, text, timestamp, pgTable } from "drizzle-orm/pg-core";
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
+import { serial, text, timestamp, pgTable, uniqueIndex } from "drizzle-orm/pg-core";
 
-export const user = pgTable("user", {
-  id: serial("id").primaryKey(),
-  name: text("name"),
-  email: text("email"),
-  password: text("password"),
-  role: text("role").$type<"admin" | "user">().default("user"),
-  createdAt: timestamp("created_at"),
-  updatedAt: timestamp("updated_at"),
-});
+export const UsersTable = pgTable('users',
+  {
+    id: serial('id').primaryKey(),
+    name: text('name').notNull(),
+    email: text('email').notNull(),
+    image: text('image').notNull(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().notNull(),
+  },
+  (users) => {
+    return {
+      uniqueIdx: uniqueIndex('unique_idx').on(users.email),
+    }
+  }
+)
+
+export type User = InferSelectModel<typeof UsersTable>
+export type NewUser = InferInsertModel<typeof UsersTable>
 ```
 ```javascript
 // Add ./db/migrate.ts
 
-import { Pool } from "pg";
+import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
+
+const { Pool } = pg;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -69,10 +81,12 @@ main().catch((err) => {
 ```javascript
 // Add ./db/index.ts
 
+import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { Client } from "pg";
 
 import * as schema from "./schema";
+
+const { Client } = pg;
 
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
@@ -80,9 +94,29 @@ const client = new Client({
 
 client.connect();
 
-export const db = drizzle(client, { schema: schema });
-
 ```
+
+```javascript 
+// Add nuxt endpoint ./server/api/users.get.ts
+
+import { db } from "@/db";
+import { User, UsersTable } from "@/db/schema";
+
+export default defineEventHandler(async () => {
+  try {
+
+    const usersResp = await db.select().from(UsersTable).orderBy(UsersTable.name);
+    return { "users": usersResp }
+
+  } catch (e: any) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: e.message
+    })
+  }
+})
+```
+
 
 
 ```javascript
