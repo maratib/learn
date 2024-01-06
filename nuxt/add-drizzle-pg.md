@@ -95,9 +95,10 @@ const client = new Client({
 client.connect();
 
 ```
-
+### Endpoints
 ```javascript 
 // Add nuxt endpoint ./server/api/users.get.ts
+// endpoint : http://localhost:3001/api/users
 
 import { db } from "@/db";
 import { User, UsersTable } from "@/db/schema";
@@ -108,6 +109,26 @@ export default defineEventHandler(async () => {
     const usersResp = await db.select().from(UsersTable).orderBy(UsersTable.name);
     return { "users": usersResp }
 
+  } catch (e: any) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: e.message
+    })
+  }
+})
+
+// Add nuxt endpoint ./server/api/users/[id].get.ts
+// endpoint : http://localhost:3001/api/users/7
+
+import { db } from "@/db";
+import { UsersTable } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
+export default defineEventHandler(async (event) => {
+  try {
+    const userID = event.context.params?.id as string;
+    const usersResp = await db.select().from(UsersTable).where(eq(UsersTable.id, parseInt(userID)));
+    return { "user": usersResp }
   } catch (e: any) {
     throw createError({
       statusCode: 400,
