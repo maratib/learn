@@ -6,6 +6,24 @@ yarn add -D @tailwindcss/typography @tailwindcss/forms @tailwindcss/aspect-ratio
 # Create required config files
 yarn add -D @nuxtjs/tailwindcss @nuxtjs/color-mode
 ```
+### nuxt.config.ts
+```javascript
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
+modules: ["@nuxtjs/tailwindcss", "@nuxtjs/color-mode"],
+  tailwindcss: {
+    cssPath: '~/assets/css/tailwind.css',
+    configPath: 'tailwind.config.ts',
+    exposeConfig: false,
+    injectPosition: 0,
+    viewer: false,
+  },
+  colorMode: {
+    classSuffix: ''
+  },
+}
+```
+### tailwind.config.ts
 
 ```javascript
 // add or update the following in your tailwind.config.js
@@ -71,30 +89,15 @@ export default {
 } satisfies Config
 
 ```
+### ~/assets/css/tailwind.css
 ```css
 /* add or update the following in your assets/css/main.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 ```
-```javascript
-// https://nuxt.com/docs/api/configuration/nuxt-config
-export default defineNuxtConfig({
-modules: ["@nuxtjs/tailwindcss", "@nuxtjs/color-mode"],
-  tailwindcss: {
-    cssPath: '~/assets/css/tailwind.css',
-    configPath: 'tailwind.config.ts',
-    exposeConfig: false,
-    injectPosition: 0,
-    viewer: false,
-  },
-  colorMode: {
-    classSuffix: ''
-  },
-}
-```
 
-### Adding Headless UI
+### Adding Headless UI (Optional)
 ```bash
 yarn add -D @headlessui/vue
 ```
