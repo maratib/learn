@@ -20,15 +20,18 @@ DB_URL="postgres://user:password@host:5432/dbName"
 // Add drizzle.config.ts
 
 import { defineConfig } from 'drizzle-kit'
+
 export default defineConfig({
+
   schema: "./db/schema.ts",
   out: "./db/drizzle",
   driver: 'pg',
   dbCredentials: {
-    connectionString: process.env.DB_URL!,
+    connectionString: process.env.DB_URL as string,
   },
   verbose: true,
   strict: true,
+
 })
 ```
 ### Schema
@@ -75,10 +78,8 @@ export type NewUser = InferInsertModel<typeof UsersTable>
 ```javascript
 // Add ~/db/migrate.ts
 
-import 'dotenv/config'
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { db } from "~/db";
-
 
 async function main() {
   console.log("migration started...");
@@ -97,10 +98,13 @@ main().catch((err) => {
 ```javascript
 // Add ~/db/index.ts
 
+import 'dotenv/config'
 import pg from 'pg';
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
-import 'dotenv/config'
+
+if (!("DB_URL" in process.env))
+  throw new Error("DB_URL not found on .env, connection failed");
 
 const { Pool } = pg;
 
@@ -115,14 +119,10 @@ export const db = drizzle(pool, { schema: schema });
 ```javascript
 // Add ~/db/seed.ts
 
-import 'dotenv/config'
 import { faker } from "@faker-js/faker";
 import { db } from "~/db";
 import { hash } from "~/server/utils/encrypt";
 import { UsersTable, type NewUser } from './schema';
-
-if (!("DB_URL" in process.env))
-  throw new Error("DB_URL not found on .env.development");
 
 const main = async () => {
   console.log('Seeding starts ...');
@@ -154,14 +154,15 @@ const main = async () => {
   // }
 
   // console.log(data);
-  await db.insert(UsersTable).values(data)
+  try {
+    await db.insert(UsersTable).values(data)
+  } catch (error: any) {
+    console.log(error.message);
+  }
   console.log('Seeding done ...');
-
-
 }
 
 main();
-
 ```
 
 ### Encryption utility for password hashing and verification
@@ -197,17 +198,21 @@ import { eq } from "drizzle-orm";
 import { db } from "~/db";
 import { NewUser, UsersTable } from "~/db/schema";
 import { BAD_REQUEST, RESOURCE_NOT_FOUND } from "~/server/utils/exceptions";
-import { hash } from "~/db/encrypt";
+import { hash } from "~/server/utils/encrypt";
 
 export class User {
-  constructor() { }
+
+
+  constructor(private event: any) { }
+
 
   async all() {
     try {
       const usersResp = await db.select().from(UsersTable);
+
       return { users: usersResp };
     } catch (e: any) {
-      BAD_REQUEST(e);
+      return BAD_REQUEST(this.event);
     }
   }
 
@@ -219,7 +224,7 @@ export class User {
         .where(eq(UsersTable.id, id));
       return usersResp?.[0];
     } catch (e: any) {
-      RESOURCE_NOT_FOUND(e);
+      return RESOURCE_NOT_FOUND(this.event);
     }
   }
 
@@ -231,7 +236,7 @@ export class User {
         .where(eq(UsersTable.user, user));
       return { user: usersResp };
     } catch (e: any) {
-      RESOURCE_NOT_FOUND(e);
+      return RESOURCE_NOT_FOUND(this.event);
     }
   }
 
@@ -243,7 +248,7 @@ export class User {
         .where(eq(UsersTable.email, email));
       return usersResp?.[0];
     } catch (e: any) {
-      RESOURCE_NOT_FOUND(e);
+      return RESOURCE_NOT_FOUND(this.event);
     }
   }
 
@@ -259,42 +264,53 @@ export class User {
         newUser: result
       }
 
-    } catch (e: any) { BAD_REQUEST(e) }
-
-
+    } catch (e: any) {
+      return BAD_REQUEST(this.event)
+    }
   } // createUser ends
-
-
-
 }
-
-
 ```
 ### Exceptions 
 
 ```javascript
 // Add ~/server/utils/exceptions.ts
 
-export const BAD_REQUEST = (e: any) => {
-  throw createError({
-    statusCode: 400,
-    statusMessage: e.message,
-  });
-}
-
-export const RESOURCE_NOT_FOUND = (e: any) => {
-  throw createError({
-    statusCode: 404,
-    statusMessage: e.message,
-  });
-}
-
-export const UNAUTHORIZED = (message: string) => {
-  throw createError({
-    statusCode: 401,
+export const sendErrorResponse = (event: any, statusCode: number, message: string) => {
+  sendError(event, createError({
+    statusCode: statusCode,
     statusMessage: message,
-  });
+  }));
 }
+
+export const BAD_REQUEST = (event: any) => {
+  sendError(event, createError({
+    statusCode: 400,
+    statusMessage: 'Bad request',
+  }));
+}
+
+export const RESOURCE_NOT_FOUND = (event: any) => {
+  sendError(event, createError({
+    statusCode: 404,
+    statusMessage: 'Resource not found',
+  }));
+}
+
+export const UNAUTHORIZED = (event: any) => {
+  sendError(event, createError({
+    statusCode: 403,
+    statusMessage: 'Unauthorized',
+  }));
+}
+
+export const INVALID_CREDENTIALS = (event: any) => {
+  sendError(event, createError({
+    statusCode: 401,
+    statusMessage: 'Invalid Credentials',
+  }));
+}
+
+
 ```
 ### Endpoints
 ```javascript 
@@ -304,9 +320,10 @@ export const UNAUTHORIZED = (message: string) => {
 
 import { User } from "~/server/model/user";
 
-const user = new User()
-
 export default defineEventHandler(async (event) => {
+
+  const user = new User(event);
+
   if (event.node.req.method === 'GET') { // GET
     return await user.all();
   }
@@ -320,7 +337,7 @@ export default defineEventHandler(async (event) => {
       event.node.res.statusCode = 201
       return newUser;
 
-    } catch (e: any) { BAD_REQUEST(e) }
+    } catch (e: any) { return BAD_REQUEST(event) }
   }
 
 })
