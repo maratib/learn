@@ -10,9 +10,9 @@ yarn add -D drizzle-kit @types/pg @faker-js/faker tsx @types/bcryptjs
 
 # .env example
 # For vercel-postgres 
-DB_URL="postgres://user:password@host:5432/dbName?sslmode=require"
+DATABASE_URL="postgres://user:password@host:5432/dbName?sslmode=require"
 # For Local-postgres
-DB_URL="postgres://user:password@host:5432/dbName"
+DATABASE_URL="postgres://user:password@host:5432/dbName"
 
 ```
 ### Global config
@@ -275,10 +275,19 @@ export class User {
 ```javascript
 // Add ~/server/utils/exceptions.ts
 
-export const sendErrorResponse = (event: any, statusCode: number, message: string) => {
+export const throwErrorResponse = (statusCode: number, statusMessage: string, message: string) => {
+  throw createError({
+    statusCode: 400,
+    statusMessage: "Invalid cookie signature",
+    message: "Invalid cookie signature",
+  });
+}
+
+export const sendErrorResponse = (event: any, statusCode: number, statusMessage: string, message = '') => {
   sendError(event, createError({
     statusCode: statusCode,
     statusMessage: message,
+    message
   }));
 }
 
@@ -309,8 +318,6 @@ export const INVALID_CREDENTIALS = (event: any) => {
     statusMessage: 'Invalid Credentials',
   }));
 }
-
-
 ```
 ### Endpoints
 ```javascript 

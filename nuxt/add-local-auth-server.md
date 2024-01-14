@@ -8,6 +8,7 @@
 
 import { User } from "~/server/model/user";
 import { verify } from "~/server/utils/encrypt";
+import { INVALID_CREDENTIALS } from "~/server/utils/exceptions";
 
 export default defineEventHandler(async (event) => {
 
@@ -15,42 +16,32 @@ export default defineEventHandler(async (event) => {
 
   const { email, password, rememberMe } = body;
 
-  const user = new User()
+  const user = new User(event)
 
   // console.log(body);
 
   const userWithPassword = await user.findByEmail(email);
-  if (!userWithPassword) {
-    return createError({
-      statusCode: 401,
-      message: "Bad credentials1",
-    });
-  }
+  if (!userWithPassword) return INVALID_CREDENTIALS(event)
 
   console.log(userWithPassword);
 
   const verified = await verify(userWithPassword.password, password);
-  if (!verified) {
-    return createError({
-      statusCode: 401,
-      message: "Bad credentials2",
-    });
-  }
+  if (!verified) return INVALID_CREDENTIALS(event)
 
 
   const config = useRuntimeConfig();
 
   const session = serialize({ userId: userWithPassword.id });
-  const signedSession = sign(session, config.cookieSecret);
+  const signedSession = sign(session, config.private.cookieSecret);
 
-  setCookie(event, config.cookieName, signedSession, {
+  setCookie(event, config.private.cookieName, signedSession, {
     httpOnly: true,
     path: "/",
     sameSite: "strict",
     secure: process.env.NODE_ENV === "production",
     expires: rememberMe
-      ? new Date(Date.now() + config.cookieRememberMeExpires)
-      : new Date(Date.now() + config.cookieExpires),
+      ? new Date(Date.now() + config.private.cookieRememberMeExpires)
+      : new Date(Date.now() + config.private.cookieExpires),
   });
 
   const userWithoutPassword = ({
@@ -74,7 +65,7 @@ export default defineEventHandler(async (event) => {
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
 
-  deleteCookie(event, config.cookieName, {
+  deleteCookie(event, config.private.cookieName, {
     httpOnly: true,
     path: "/",
     sameSite: "strict",
@@ -102,6 +93,7 @@ export default defineEventHandler(async (event) => {
   const { password: _password, ...userWithoutPassword } = userWithPassword;
   return { user: userWithoutPassword }
 });
+
 
 ```
 ### Middleware Session (Server)
@@ -146,9 +138,10 @@ export async function getUserFromSession(event: H3Event) {
 ```
 ### Cookie utils (Server)
 ```javascript
-// Add ~/server/utils/cookie.ts
+// Add ~/utils/cookie.ts
 
 import { type KeyObject, createHmac, timingSafeEqual } from "node:crypto";
+import { throwErrorResponse } from "./exceptions";
 
 export type CookieSecret = string | Buffer | KeyObject;
 
@@ -157,12 +150,7 @@ export function serialize(obj: object) {
   const length = Buffer.byteLength(value);
 
   if (length > 4096)
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Bad request",
-      message: "Cookie too large",
-    });
-
+    throwErrorResponse(400, "Bad request", "Cookie too large")
   return value;
 }
 
@@ -183,38 +171,59 @@ export function unsign(input: string, secret: CookieSecret) {
   const inputBuffer = Buffer.from(input);
 
   if (!(expectedBuffer.equals(inputBuffer) && timingSafeEqual(expectedBuffer, inputBuffer))) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Invalid cookie signature",
-      message: "Invalid cookie signature",
-    });
+    throwErrorResponse(400, "Invalid cookie signature", "Invalid cookie signature");
   }
 
   return value;
 }
+
 ```
 ### Exceptions
 ```javascript
 // Add ~/server/utils/exceptions.ts
 
-export const BAD_REQUEST = (e: any) => {
+export const throwErrorResponse = (statusCode: number, statusMessage: string, message: string) => {
   throw createError({
     statusCode: 400,
-    statusMessage: e.message,
+    statusMessage: "Invalid cookie signature",
+    message: "Invalid cookie signature",
   });
 }
 
-export const RESOURCE_NOT_FOUND = (e: any) => {
-  throw createError({
-    statusCode: 404,
-    statusMessage: e.message,
-  });
-}
-
-export const UNAUTHORIZED = (message: string) => {
-  throw createError({
-    statusCode: 401,
+export const sendErrorResponse = (event: any, statusCode: number, statusMessage: string, message = '') => {
+  sendError(event, createError({
+    statusCode: statusCode,
     statusMessage: message,
-  });
+    message
+  }));
 }
+
+export const BAD_REQUEST = (event: any) => {
+  sendError(event, createError({
+    statusCode: 400,
+    statusMessage: 'Bad request',
+  }));
+}
+
+export const RESOURCE_NOT_FOUND = (event: any) => {
+  sendError(event, createError({
+    statusCode: 404,
+    statusMessage: 'Resource not found',
+  }));
+}
+
+export const UNAUTHORIZED = (event: any) => {
+  sendError(event, createError({
+    statusCode: 403,
+    statusMessage: 'Unauthorized',
+  }));
+}
+
+export const INVALID_CREDENTIALS = (event: any) => {
+  sendError(event, createError({
+    statusCode: 401,
+    statusMessage: 'Invalid Credentials',
+  }));
+}
+
 ```
