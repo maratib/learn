@@ -1,13 +1,17 @@
 # Test settings
 
+To Enable Test explorer (`Cmd+Shift+P -> Mocha Test Explorer: Enable for a workspace folder`)
 
 ### Typescript test settings
+
 There are two ways to make Mocha Test Explorer works with Hardhat typescript testing
+
 ```javascript
 //1 . Add the following to vs-code settings.json
     "mochaExplorer.files": "test/**/*.{js,ts}",
     "mochaExplorer.require": "hardhat/register"
 ```
+
 ```javascript
 //OR add .mocharc.json to root folder and add the following
 {
