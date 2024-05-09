@@ -1,9 +1,10 @@
 # Solidity
-Solidity is most popular language for writting `Smart Contract`
+Solidity is most popular language for writting `Smart Contracts`, You can use it for all the popular blockchains `ETHEREUM, POLYGON, ARBITRUM and other EVM BLOCKCHAINS`  
 
-You can use it for all the popular blockchains:-  
+`Solidity` is a high level language when compiled be converted to `OPCODES` which will be loaded to EVMs. (e.g `Solidity` -> `OPCODES` => `EVM`)
 
-`ETHEREUM, POLYGON, ARBITRUM and EVM BLOCKCHAINS`
+
+
 
 ### What is Smart Contract?
 A smart contract is a small program that lives on a blockchain, once deployed it cannot be changed, modified, removed, stopped, censored or doctored in anyway.
