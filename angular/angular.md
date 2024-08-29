@@ -100,7 +100,7 @@ export class AppModule {}
 
 ## 4 - Data Binding
 
-### `What is data binding?`
+### `What is Data Binding?`
 
 Data binding is a way to communicate between your component and your view.
 
