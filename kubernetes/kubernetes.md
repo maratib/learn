@@ -1,4 +1,6 @@
-# Kubernetes Basics
+# Kubernetes
+
+An `open-source container orchestration platform` that enables developers to manage their containerized applications.
 
 ## Setup
 
