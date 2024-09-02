@@ -1,6 +1,6 @@
-# Kubernetes
+# Kubernetes (K8)
 
-An `open-source container orchestration platform` that enables developers to manage their containerized applications.
+K8 is a `container orchestration platform` that enables developers to manage their containerized applications.
 
 ## Setup
 
@@ -23,7 +23,7 @@ minikube -h # For further help options
 
 ## What is Kubernetes
 
-- Kubernetes is an `open-source container orchestration platform` that automates the `deployment, scaling and management` of containerized applications.
+- Kubernetes is an open-source `container orchestration platform` that automates the `deployment, scaling and management` of containerized applications.
 
 - `Orchestration` means `managing the lifecycle of containers`
 
